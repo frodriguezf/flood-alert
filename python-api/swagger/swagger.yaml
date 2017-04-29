@@ -13,7 +13,7 @@ paths:
         - flood
       summary: Check alert in some place
       description: ''
-      operationId: 'controllers.alert_controller.ger_alerts'
+      operationId: 'controllers.alert_controller.get_alerts'
       produces:
         - application/json
       parameters:
