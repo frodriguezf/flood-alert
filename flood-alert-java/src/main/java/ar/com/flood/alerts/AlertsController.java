@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,18 +30,18 @@ import ar.com.flood.social.SocialConfig;
 
 /**
  * @author rabella
- * 
+ *
  */
 @Controller
 public class AlertsController implements AlertsApi {
 
 	private AlertManager alertManager;
-	
+
 	private SocialConfig socialConfig;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param companyManager
 	 */
 	@Autowired
@@ -45,22 +50,23 @@ public class AlertsController implements AlertsApi {
 		this.alertManager = alertManager;
 		this.socialConfig = socialConfig;
 	}
-	
+
 	@Override
 	public ResponseEntity<Alerts> alertsGet(Integer page, Integer pageSize,
 			Double lat, Double lon, Date date) {
 		Alerts alerts = new Alerts();
 		alertManager.allAlerts().map(alertManager::toAlert).forEach(alerts.getAlerts()::add);
 		alerts.setCount(alerts.getAlerts().size());
+		playAlertSound();
 		return new ResponseEntity<>(alerts, HttpStatus.OK);
-	}	
-	
+	}
+
 	@Override
 	public ResponseEntity<Alert> alertsPost(@RequestBody Alert alert) {
 		ApplicationContext appContext =
 		    	   new ClassPathXmlApplicationContext(new String[] {"flood-alert-context.xml"});
 		Resource resource =
-		          appContext.getResource("file:"+ mergeImages());
+		   		          appContext.getResource("url:http://flood.umd.edu/plots/fmapR-30241.gif?mct=0.14470000");
 		TweetData tweetData = new TweetData(alert.getMessage())
 													.atLocation(-0.126f, 51.502f)
 													.displayCoordinates(true)
@@ -68,33 +74,24 @@ public class AlertsController implements AlertsApi {
 		socialConfig.getTwitter().timelineOperations().updateStatus(tweetData);
 		return new ResponseEntity<>(alertManager.toAlertEntity(alert), HttpStatus.CREATED);
 	}
-	
-	private String mergeImages() {
-		File path = new File("src/extra/images");
 
-		// load source images
-		BufferedImage image;
+	private void playAlertSound() {
 		try {
-			image = ImageIO.read(new File(path, "image.png"));
-			BufferedImage overlay = ImageIO.read(new File(path, "overlay.png"));
-	
-			// create the new image, canvas size is the max. of both image sizes
-			int w = Math.max(image.getWidth(), overlay.getWidth());
-			int h = Math.max(image.getHeight(), overlay.getHeight());
-			BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-	
-			// paint both images, preserving the alpha channels
-			Graphics g = combined.getGraphics();
-			g.drawImage(image, 0, 0, null);
-			g.drawImage(overlay, 0, 0, null);
-		
-			// Save as new image
-			File result = new File(path, "combined.png");
-			ImageIO.write(combined, "PNG", result);
-			return result.getAbsolutePath();
-		} catch (IOException e) {
+			File yourFile = new File("src/extra/sounds/Siren_Nois.wav");
+			AudioInputStream stream;
+			AudioFormat format;
+			DataLine.Info info;
+			Clip clip;
+
+			stream = AudioSystem.getAudioInputStream(yourFile);
+			format = stream.getFormat();
+			info = new DataLine.Info(Clip.class, format);
+			clip = (Clip) AudioSystem.getLine(info);
+			clip.open(stream);
+			clip.start();
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
 }

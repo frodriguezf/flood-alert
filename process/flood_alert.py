@@ -20,34 +20,29 @@ Options:
 from docopt import docopt
 from datetime import date, datetime
 import matplotlib.pyplot as plt
+from pprint import pprint
 
 from floodDetector import floodDetector
 from api.flood_api import send_alarm_on_point
+from settings import WARNING_ALARM, CAUTION_ALARM, DANGER_ALARM
 
-# det0 = fd()
-# det0.set_init_date(2013,3,31)
-# det0.set_region(-36.35, -66.20, -33.83, -59.58)
-# det0.detect()
-# det0.detect()
-# det0.detect()
-# det0.detect()
-# det0.detect()
-#
-#
-#
-#
-# plt.figure()
-# plt.plot(det0.get_dbuff(),label='mean')
-# plt.plot(det0.get_vbuff(),label='std')
-# plt.plot(det0.get_mbuff(),label='max')
-# plt.grid(True)
-# plt.legend(loc=0)
-#
-# plt.figure()
-# plt.plot(det0.get_sbuff())
-# plt.grid(True)
-#
-# plt.show()
+
+def graph(fd_obj):
+    plt.figure()
+
+    # Mean, std, and max.
+    plt.plot(fd_obj.get_dbuff(), label='mean')
+    plt.plot(fd_obj.get_vbuff(), label='std')
+    plt.plot(fd_obj.get_mbuff(), label='max')
+    plt.grid(True)
+    plt.legend(loc=0)
+
+    # Surface graph.
+    plt.figure()
+    plt.plot(fd_obj.get_sbuff())
+    plt.grid(True)
+    plt.show()
+
 
 def _get_date(date_arg):
     if date_arg is not None:
@@ -81,6 +76,11 @@ if __name__ == '__main__':
     alarm_on = det0.get_alarm_status()
     print("Alarm status for the region is: {}".format(alarm_on))
     if alarm_on:
-        # send_alarm_on_point(point, severity, date)
-        # TODO: Add public methods to floodDetector to get send_alarm_on_point attrs.
-        pass
+        alarm_point = det0.get_max_position()
+        severity = WARNING_ALARM
+        date = det0.get_alarm_date()
+
+        response = send_alarm_on_point(alarm_point, severity, date)
+
+        print("API response:")
+        print(pprint(response))

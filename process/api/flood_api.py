@@ -19,7 +19,7 @@ def _build_payload(lat, lon, severity, date, msg=None):
     payload['severity'] = severity
     payload['message'] = msg or "Flood detection in location"
 
-    return EXAMPLE_PAYLOAD
+    return payload
 
 
 def send_alarm_on_point(point, severity, date):
