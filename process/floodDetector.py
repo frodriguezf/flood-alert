@@ -16,6 +16,8 @@ class floodDetector():
 
         self.__alarm_on  = False
         self.__threshold = 10
+        self.__latitude  = 0
+        self.__longitude = 0
 
     def set_alarm_threshold(self,threshold):
         self.__threshold = threshold
@@ -72,8 +74,6 @@ class floodDetector():
             path += '{0:02d}'.format(index)
             path += '.bin'
 
-            print(path)
-
             if self.load_data(path):
 
                 lat0 = self.__coords['cart']['lat_low']
@@ -85,7 +85,7 @@ class floodDetector():
 
                 if self.__mbuff[-1] >= self.__threshold:
                     self.__alarm_on = True
-                    self.find_max_position(self.__flood[lat1:lat0+1,lon0:lon1+1],self.__mbuff[-1])
+                    self.__latitude, self.__longitude = self.find_max_position(self.__flood[lat1:lat0+1,lon0:lon1+1],self.__mbuff[-1])
                 else:
                     self.__alarm_on = False
 
@@ -97,6 +97,9 @@ class floodDetector():
     def get_alarm_status(self):
         return self.__alarm_on
 
+    def get_max_position(self):
+        return self.__latitude, self.__longitude
+    
     def get_dbuff(self):
         return self.__dbuff
 
