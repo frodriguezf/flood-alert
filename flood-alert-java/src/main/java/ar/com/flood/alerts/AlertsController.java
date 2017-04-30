@@ -57,7 +57,6 @@ public class AlertsController implements AlertsApi {
 		Alerts alerts = new Alerts();
 		alertManager.allAlerts().map(alertManager::toAlert).forEach(alerts.getAlerts()::add);
 		alerts.setCount(alerts.getAlerts().size());
-		playAlertSound();
 		return new ResponseEntity<>(alerts, HttpStatus.OK);
 	}
 
@@ -66,15 +65,35 @@ public class AlertsController implements AlertsApi {
 		ApplicationContext appContext =
 		    	   new ClassPathXmlApplicationContext(new String[] {"flood-alert-context.xml"});
 		Resource resource =
-		   		          appContext.getResource("url:http://flood.umd.edu/plots/fmapR-30241.gif?mct=0.14470000");
-		TweetData tweetData = new TweetData(alert.getMessage())
-													.atLocation(-0.126f, 51.502f)
+		   		          appContext.getResource(getUrlGoogleMaps(alert.getLatitude(), alert.getLongitude()));
+		TweetData tweetData = new TweetData(alert.getMessage() + " #spaceappsriocuarto #spaceappschallenge @SpaceAppsCba" + "\n" + "http://maps.google.com/maps?q=loc:" + alert.getLatitude() + "," + alert.getLongitude())
+													.atLocation(alert.getLatitude().floatValue(), alert.getLongitude().floatValue())
 													.displayCoordinates(true)
 													.withMedia(resource);
 		socialConfig.getTwitter().timelineOperations().updateStatus(tweetData);
+		playAlertSound();
 		return new ResponseEntity<>(alertManager.toAlertEntity(alert), HttpStatus.CREATED);
 	}
 
+	private String getUrlGoogleMaps(Double lat, Double lon) {
+		String urlFormat = "https://maps.googleapis.com/maps/api/staticmap?zoom=12&size=600x300&path=color:0x00000000|fillcolor:0xFFCC00|weight:1|%s&key=AIzaSyCG-6POJlzu9CHR2r5K4-Dtk8CBU9CtNtQ";
+		StringBuilder url = new StringBuilder();
+		url.append("url:")
+			.append(urlFormat);
+		return String.format(url.toString(), getPolygon(lat, lon));
+	}
+	
+	private String getPolygon(Double lat, Double lon){
+		StringBuilder polygon = new StringBuilder();
+		Double km = 0.058500059;
+		String v1 = Double.toString(lat + km) + "," + Double.toString(lon + km) + "|";
+		String v2 = Double.toString(lat + km) + "," + Double.toString(lon - km) + "|";
+		String v3 = Double.toString(lat - km) + "," + Double.toString(lon - km) + "|";
+		String v4 = Double.toString(lat - km) + "," + Double.toString(lon + km) + "|";
+		String v5 = Double.toString(lat + km) + "," + Double.toString(lon + km);
+		polygon.append(v1).append(v2).append(v3).append(v4).append(v5);
+		return polygon.toString();
+	}
 	private void playAlertSound() {
 		try {
 			File yourFile = new File("src/extra/sounds/Siren_Nois.wav");
