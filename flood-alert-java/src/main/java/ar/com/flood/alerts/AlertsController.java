@@ -67,8 +67,6 @@ public class AlertsController implements AlertsApi {
 		Resource resource =
 		   		          appContext.getResource(getUrlGoogleMaps(alert.getLatitude(), alert.getLongitude()));
 		TweetData tweetData = new TweetData(alert.getMessage() + " #spaceappsriocuarto #spaceappschallenge @SpaceAppsCba" + "\n" + "http://maps.google.com/maps?q=loc:" + alert.getLatitude() + "," + alert.getLongitude())
-													.atLocation(alert.getLatitude().floatValue(), alert.getLongitude().floatValue())
-													.displayCoordinates(true)
 													.withMedia(resource);
 		socialConfig.getTwitter().timelineOperations().updateStatus(tweetData);
 		playAlertSound();
