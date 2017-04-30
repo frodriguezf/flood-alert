@@ -80,13 +80,10 @@ class floodDetector():
 
                 self.proc(self.__flood[lat1:lat0+1,lon0:lon1+1])
 
-                if self.__mbuff >= self.__threshold:
+                if self.__mbuff[-1] >= self.__threshold:
                     self.__alarm_on = True
                 else:
                     self.__alarm_on = False
-
-                
-
 
         self.__bday = self.__bday + timedelta(days=1)
 
