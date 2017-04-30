@@ -1,8 +1,4 @@
-import requests
-import json
-
-from settings import API_ENDPOINT
-
+"""
 EXAMPLE_PAYLOAD = {
   "date": "2017-04-30",
   "message": "Flood detection in point",
@@ -10,6 +6,12 @@ EXAMPLE_PAYLOAD = {
   "latitude": 0,
   "longitude": 0
 }
+"""
+
+import requests
+import json
+
+from settings import API_ENDPOINT
 
 
 def _build_payload(lat, lon, severity, date, msg=None):
