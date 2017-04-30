@@ -62,9 +62,10 @@ class floodDetector():
             self.__sbuff.append(100*(1.0*datos.size/mapa.size))
 
 
-    def find_max_position(self,mapa, mmax):
+    def find_max_position(self, mapa, mmax):
         i,j  = np.where(mapa==mmax);
-        return ((50-i[0]*0.125),(0.125*j[0]-127.15))
+        return ((50-(i[0]+self.__coords['cart']['lat_up'])*0.125),
+                (0.125*(j[0] + self.__coords['cart']['long_low'])-127.15))
 
     def detect(self):
 

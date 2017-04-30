@@ -20,7 +20,7 @@ def _build_payload(lat, lon, severity, date, msg=None):
     payload['latitude'] = lat
     payload['longitude'] = lon
     payload['severity'] = severity
-    payload['message'] = msg or "Flood detection in location"
+    payload['message'] = msg or "Flood detection"
 
     return json.dumps(payload)
 
