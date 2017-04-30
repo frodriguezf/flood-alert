@@ -63,23 +63,31 @@ def process_alarm(fd_obj):
 
     cprint("Alarm status for the region is: {}".format(alarm_on))
 
-    if alarm_on:
-        alarm_point = det0.get_max_position()
-        severity = DANGER_ALARM
-        date = det0.get_alarm_date()
+    return alarm_on
 
-        response = send_alarm_on_point(alarm_point, severity, date)
 
-        #print("API response:")
-        #print(pprint(response))
+def send_alarm(fd_obj):
+    alarm_point = det0.get_max_position()
+    #blue("[DEBUG] Alarm point: {} {}".format(*alarm_point))
+    severity = DANGER_ALARM
+    date = det0.get_alarm_date()
+
+    send_alarm_on_point(alarm_point, severity, date)
 
 
 def detect(fd_obj):
     # Run detect for 3 days.
+    alarm_on = False
     for _ in xrange(3):
         green("Running processor on day {}".format(fd_obj.get_running_date()))
         fd_obj.detect()
-        process_alarm(fd_obj)
+
+        # If an alarm was set, it mantains set.
+        new_alarm = process_alarm(fd_obj)
+        alarm_on = alarm_on or new_alarm
+
+    if alarm_on:
+        send_alarm(fd_obj)
 
 
 if __name__ == '__main__':
