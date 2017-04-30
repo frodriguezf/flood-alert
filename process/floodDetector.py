@@ -18,6 +18,7 @@ class floodDetector():
         self.__threshold = 10
         self.__latitude  = 0
         self.__longitude = 0
+        self.__alarm_date = None
 
     def set_alarm_threshold(self,threshold):
         self.__threshold = threshold
@@ -50,7 +51,7 @@ class floodDetector():
     def proc(self,mapa):
         datos  = mapa.reshape(1,mapa.size)
         datos  = datos[datos>0.0]
-        
+
         if not datos.any():
             self.__dbuff.append(0)
             self.__sbuff.append(0)
@@ -86,20 +87,21 @@ class floodDetector():
                 if self.__mbuff[-1] >= self.__threshold:
                     self.__alarm_on = True
                     self.__latitude, self.__longitude = self.find_max_position(self.__flood[lat1:lat0+1,lon0:lon1+1],self.__mbuff[-1])
+                    self.__alarm_date = self.__bday
                 else:
                     self.__alarm_on = False
-
-                
-
 
         self.__bday = self.__bday + timedelta(days=1)
 
     def get_alarm_status(self):
         return self.__alarm_on
 
+    def get_alarm_date(self):
+        return self.__alarm_date
+
     def get_max_position(self):
         return self.__latitude, self.__longitude
-    
+
     def get_dbuff(self):
         return self.__dbuff
 
