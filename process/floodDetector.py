@@ -16,6 +16,9 @@ class floodDetector():
 
         self.__alarm_on  = False
         self.__threshold = 10
+        self.__latitude  = 0
+        self.__longitude = 0
+        self.__alarm_date = None
 
     def set_alarm_threshold(self,threshold):
         self.__threshold = threshold
@@ -45,11 +48,10 @@ class floodDetector():
         else:
             return False
 
-    def proc(self,map):
-        #datos = np.array([i for i in list(map.reshape(1,map.size)) if i>0.0])
-        datos  = map.reshape(1,map.size)
+    def proc(self,mapa):
+        datos  = mapa.reshape(1,mapa.size)
         datos  = datos[datos>0.0]
-        
+
         if not datos.any():
             self.__dbuff.append(0)
             self.__sbuff.append(0)
@@ -57,8 +59,12 @@ class floodDetector():
             self.__dbuff.append(datos.mean())
             self.__vbuff.append(datos.std())
             self.__mbuff.append(datos.max())
-            self.__sbuff.append(100*(1.0*datos.size/map.size))
+            self.__sbuff.append(100*(1.0*datos.size/mapa.size))
 
+
+    def find_max_position(self,mapa, mmax):
+        i,j  = np.where(mapa==mmax);
+        return ((50-i[0]*0.125),(0.125*j[0]-127.15))
 
     def detect(self):
 
@@ -69,8 +75,6 @@ class floodDetector():
             path += '{0:02d}'.format(index)
             path += '.bin'
 
-            print(path)
-
             if self.load_data(path):
 
                 lat0 = self.__coords['cart']['lat_low']
@@ -80,18 +84,23 @@ class floodDetector():
 
                 self.proc(self.__flood[lat1:lat0+1,lon0:lon1+1])
 
-                if self.__mbuff >= self.__threshold:
+                if self.__mbuff[-1] >= self.__threshold:
                     self.__alarm_on = True
+                    self.__latitude, self.__longitude = self.find_max_position(self.__flood[lat1:lat0+1,lon0:lon1+1],self.__mbuff[-1])
+                    self.__alarm_date = self.__bday
                 else:
                     self.__alarm_on = False
-
-                
-
 
         self.__bday = self.__bday + timedelta(days=1)
 
     def get_alarm_status(self):
         return self.__alarm_on
+
+    def get_alarm_date(self):
+        return self.__alarm_date
+
+    def get_max_position(self):
+        return self.__latitude, self.__longitude
 
     def get_dbuff(self):
         return self.__dbuff
