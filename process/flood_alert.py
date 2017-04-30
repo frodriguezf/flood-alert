@@ -19,10 +19,10 @@ Options:
 
 from docopt import docopt
 from datetime import date, datetime
-
-from floodDetector import floodDetector
 import matplotlib.pyplot as plt
 
+from floodDetector import floodDetector
+from api.flood_api import send_alarm_on_point
 
 # det0 = fd()
 # det0.set_init_date(2013,3,31)
@@ -74,4 +74,13 @@ if __name__ == '__main__':
     # Set region.
     det0.set_region(lb_lat, lb_lon, rt_lat, rt_lon)
 
+    # Process the data.
     det0.detect()
+
+    # Check alarm.
+    alarm_on = det0.get_alarm_status()
+    print("Alarm status for the region is: {}".format(alarm_on))
+    if alarm_on:
+        # send_alarm_on_point(point, severity, date)
+        # TODO: Add public methods to floodDetector to get send_alarm_on_point attrs.
+        pass
