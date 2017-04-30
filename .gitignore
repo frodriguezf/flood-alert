@@ -96,3 +96,12 @@ ENV/
 
 # mkdocs documentation
 /site
+
+
+
+#javaignore
+flood-alert-java/target/
+.classpath
+.project
+.settings/
+flood-alert-java/node_modules
