@@ -26,7 +26,8 @@ from pprint import pprint
 
 from floodDetector import floodDetector
 from api.flood_api import send_alarm_on_point
-from settings import WARNING_ALARM, CAUTION_ALARM, DANGER_ALARM
+from utils import green, blue, red, yellow
+from settings import DANGER_ALARM
 
 
 def graph(fd_obj):
@@ -53,6 +54,34 @@ def _get_date(date_arg):
         return date.today()
 
 
+def process_alarm(fd_obj):
+    # Check alarm.
+    alarm_on = det0.get_alarm_status()
+    cprint = green
+    if alarm_on:
+        cprint = red
+
+    cprint("Alarm status for the region is: {}".format(alarm_on))
+
+    if alarm_on:
+        alarm_point = det0.get_max_position()
+        severity = DANGER_ALARM
+        date = det0.get_alarm_date()
+
+        response = send_alarm_on_point(alarm_point, severity, date)
+
+        #print("API response:")
+        #print(pprint(response))
+
+
+def detect(fd_obj):
+    # Run detect for 3 days.
+    for _ in xrange(3):
+        green("Running processor on day {}".format(fd_obj.get_running_date()))
+        fd_obj.detect()
+        process_alarm(fd_obj)
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
@@ -72,20 +101,7 @@ if __name__ == '__main__':
     det0.set_region(lb_lat, lb_lon, rt_lat, rt_lon)
 
     # Process the data.
-    det0.detect()
+    detect(det0)
 
-    # Check alarm.
-    alarm_on = det0.get_alarm_status()
-    print("Alarm status for the region is: {}".format(alarm_on))
     if arguments.get('--graph'):
         graph(det0)
-
-    if alarm_on:
-        alarm_point = det0.get_max_position()
-        severity = WARNING_ALARM
-        date = det0.get_alarm_date()
-
-        response = send_alarm_on_point(alarm_point, severity, date)
-
-        print("API response:")
-        print(pprint(response))

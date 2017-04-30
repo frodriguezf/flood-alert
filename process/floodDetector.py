@@ -99,6 +99,9 @@ class floodDetector():
     def get_alarm_date(self):
         return self.__alarm_date
 
+    def get_running_date(self):
+        return self.__bday
+
     def get_max_position(self):
         return self.__latitude, self.__longitude
 
