@@ -28,6 +28,3 @@ def send_alarm_on_point(point, severity, date):
     r = requests.post(API_ENDPOINT, data=payload)
 
     return r.json()
-
-
-if __name__ == '__main__':
