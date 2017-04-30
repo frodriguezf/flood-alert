@@ -1,4 +1,5 @@
 import requests
+import json
 
 from settings import API_ENDPOINT
 
@@ -13,18 +14,18 @@ EXAMPLE_PAYLOAD = {
 
 def _build_payload(lat, lon, severity, date, msg=None):
     payload = dict()
-    payload['date'] = date
+    payload['date'] = date.strftime('%Y-%m-%d')
     payload['latitude'] = lat
     payload['longitude'] = lon
     payload['severity'] = severity
     payload['message'] = msg or "Flood detection in location"
 
-    return payload
+    return json.dumps(payload)
 
 
 def send_alarm_on_point(point, severity, date):
     payload = _build_payload(point[0], point[1], severity, date)
-
-    r = requests.post(API_ENDPOINT, data=payload)
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    r = requests.post(API_ENDPOINT, data=payload, headers=headers)
 
     return r.json()

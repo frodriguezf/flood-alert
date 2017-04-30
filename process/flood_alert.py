@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Usage:
     flood_alert.py --left-lat LB_LAT --left-lon LB_LON --right-lat RT_LAT --right-lon RT_LON [--date <date>]
+    flood_alert.py --left-lat LB_LAT --left-lon LB_LON --right-lat RT_LAT --right-lon RT_LON [--date <date>] [--graph]
 
 Alerts the flood detection in specific area at given date.
 
@@ -14,7 +15,8 @@ Options:
   --left-lon LB_LON   Left Bottom point longitude of the area
   --right-lat RT_LAT  Right Top point latitude of the area
   --right-lon RT_LON  Right Top point ongitude of the area
-  --date <date>      Date of interest (dd/mm/yyyy) (Optional)
+  --date <date>       Date of interest (dd/mm/yyyy) (Optional)
+  --graph             Only graph (Optional)
 """
 
 from docopt import docopt
@@ -55,7 +57,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     # Today default value.
-    date_arg = arguments.get(date)
+    date_arg = arguments.get('--date')
     date_obj = _get_date(date_arg)
 
     det0 = floodDetector()
@@ -75,6 +77,9 @@ if __name__ == '__main__':
     # Check alarm.
     alarm_on = det0.get_alarm_status()
     print("Alarm status for the region is: {}".format(alarm_on))
+    if arguments.get('--graph'):
+        graph(det0)
+
     if alarm_on:
         alarm_point = det0.get_max_position()
         severity = WARNING_ALARM
