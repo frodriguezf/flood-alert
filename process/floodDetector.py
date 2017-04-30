@@ -45,9 +45,8 @@ class floodDetector():
         else:
             return False
 
-    def proc(self,map):
-        #datos = np.array([i for i in list(map.reshape(1,map.size)) if i>0.0])
-        datos  = map.reshape(1,map.size)
+    def proc(self,mapa):
+        datos  = mapa.reshape(1,mapa.size)
         datos  = datos[datos>0.0]
         
         if not datos.any():
@@ -57,8 +56,12 @@ class floodDetector():
             self.__dbuff.append(datos.mean())
             self.__vbuff.append(datos.std())
             self.__mbuff.append(datos.max())
-            self.__sbuff.append(100*(1.0*datos.size/map.size))
+            self.__sbuff.append(100*(1.0*datos.size/mapa.size))
 
+
+    def find_max_position(self,mapa, mmax):
+        i,j  = np.where(mapa==mmax);
+        return ((50-i[0]*0.125),(0.125*j[0]-127.15))
 
     def detect(self):
 
@@ -80,8 +83,9 @@ class floodDetector():
 
                 self.proc(self.__flood[lat1:lat0+1,lon0:lon1+1])
 
-                if self.__mbuff >= self.__threshold:
+                if self.__mbuff[-1] >= self.__threshold:
                     self.__alarm_on = True
+                    self.find_max_position(self.__flood[lat1:lat0+1,lon0:lon1+1],self.__mbuff[-1])
                 else:
                     self.__alarm_on = False
 
